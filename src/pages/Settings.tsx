@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lock, User, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { db, auth } from "@/lib/firebase.ts";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase.ts";
 import { 
   doc, 
   getDoc, 
@@ -15,13 +16,6 @@ import {
   updateDoc,
   serverTimestamp 
 } from "firebase/firestore";
-import { 
-  updatePassword,
-  verifyBeforeUpdateEmail,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  signOut
-} from "firebase/auth";
 
 interface AdminData {
   name: string;
@@ -32,6 +26,7 @@ interface AdminData {
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { user: authUser, logout, changePassword: changePasswordApi } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [adminData, setAdminData] = useState<AdminData>({
@@ -54,13 +49,11 @@ const Settings = () => {
 
   useEffect(() => {
     fetchAdminData();
-  }, []);
+  }, [authUser]);
 
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const authUser = auth.currentUser;
-      
       if (!authUser) {
         toast({
           title: "Not Authenticated",
@@ -71,7 +64,6 @@ const Settings = () => {
       }
 
       const userId = authUser.uid;
-      
       const adminDocRef = doc(db, "users", userId);
       const adminDocSnap = await getDoc(adminDocRef);
 
@@ -79,7 +71,7 @@ const Settings = () => {
         const data = adminDocSnap.data();
         const email = data.email || authUser.email || "";
         setAdminData({
-          name: data.name || data.firstName + " " + data.lastName || "",
+          name: data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : "") || "",
           email: email,
           companyName: data.companyName || ""
         });
@@ -87,13 +79,12 @@ const Settings = () => {
       } else {
         const email = authUser.email || "";
         setAdminData({
-          name: authUser.displayName || "",
+          name: authUser.name || "",
           email: email
         });
         setOriginalEmail(email);
-        
         await setDoc(adminDocRef, {
-          name: authUser.displayName || "",
+          name: authUser.name || "",
           email: email,
           role: "admin",
           createdAt: serverTimestamp(),
@@ -166,80 +157,36 @@ const Settings = () => {
 
   const handlePasswordUpdate = async () => {
     if (!validatePasswordChange()) return;
-
-    const authUser = auth.currentUser;
-    if (!authUser || !authUser.email) {
-      toast({
-        title: "Authentication Error",
-        description: "Please login again",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setSaving(true);
-      
-      const credential = EmailAuthProvider.credential(
-        authUser.email,
-        passwords.currentPassword
-      );
-      
-      await reauthenticateWithCredential(authUser, credential);
-      
-      await updatePassword(authUser, passwords.newPassword);
-      
-      setPasswords({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
-
-      toast({
-        title: "Password Updated",
-        description: "Your password has been changed successfully. You will be redirected to login.",
-      });
-      
-      // Sign out and redirect to login page
-      await signOut(auth);
-      setTimeout(() => {
-        navigate("/", { replace: true });
-      }, 1500);
-    } catch (error: any) {
-      console.error("Password update error:", error);
-      
-      if (error.code === 'auth/wrong-password') {
+      const result = await changePasswordApi(passwords.currentPassword, passwords.newPassword);
+      if (result.success) {
+        setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
         toast({
-          title: "Incorrect Password",
-          description: "Current password is incorrect",
-          variant: "destructive",
+          title: "Password Updated",
+          description: "Your password has been changed. You will be redirected to login.",
         });
-      } else if (error.code === 'auth/weak-password') {
-        toast({
-          title: "Weak Password",
-          description: "Password should be at least 6 characters",
-          variant: "destructive",
-        });
-      } else if (error.code === 'auth/requires-recent-login') {
-        toast({
-          title: "Re-authentication Required",
-          description: "Please login again to change password",
-          variant: "destructive",
-        });
+        await logout();
+        setTimeout(() => navigate("/", { replace: true }), 1500);
       } else {
         toast({
-          title: "Error",
-          description: "Failed to update password. Please try again.",
+          title: "Password Update Failed",
+          description: result.error || "Please try again.",
           variant: "destructive",
         });
       }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update password. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
   };
 
   const handleSaveProfile = async () => {
-    const authUser = auth.currentUser;
     if (!authUser) {
       toast({
         title: "Not Authenticated",
@@ -284,81 +231,7 @@ const Settings = () => {
       const adminDocRef = doc(db, "users", userId);
 
       const adminDocSnap = await getDoc(adminDocRef);
-      
-      // Check if email has changed
-      const emailChanged = adminData.email !== authUser.email;
-      
-      // If email changed, update Firebase Auth email (requires re-authentication)
-      if (emailChanged && authUser.email) {
-        // For email changes, we need current password for re-authentication
-        // We'll prompt for password if email is being changed
-        if (!passwords.currentPassword) {
-          toast({
-            title: "Password Required",
-            description: "Please enter your current password to change email",
-            variant: "destructive",
-          });
-          return;
-        }
 
-        try {
-          // Re-authenticate user before updating email
-          const credential = EmailAuthProvider.credential(
-            authUser.email!,
-            passwords.currentPassword
-          );
-          await reauthenticateWithCredential(authUser, credential);
-          
-          // Send verification email to the new email address
-          // The email will be updated after the user verifies it
-          await verifyBeforeUpdateEmail(authUser, adminData.email);
-          
-          // Note: We'll update Firestore with the new email, but Firebase Auth email
-          // will only be updated after the user verifies the new email
-        } catch (error: any) {
-          console.error("Email update error:", error);
-          
-          if (error.code === 'auth/wrong-password') {
-            toast({
-              title: "Incorrect Password",
-              description: "Current password is incorrect. Please try again.",
-              variant: "destructive",
-            });
-            return;
-          } else if (error.code === 'auth/email-already-in-use') {
-            toast({
-              title: "Email Already In Use",
-              description: "This email is already registered with another account",
-              variant: "destructive",
-            });
-            return;
-          } else if (error.code === 'auth/invalid-email') {
-            toast({
-              title: "Invalid Email",
-              description: "Please enter a valid email address",
-              variant: "destructive",
-            });
-            return;
-          } else if (error.code === 'auth/requires-recent-login') {
-            toast({
-              title: "Re-authentication Required",
-              description: "Please login again to change email",
-              variant: "destructive",
-            });
-            return;
-          } else if (error.code === 'auth/operation-not-allowed') {
-            toast({
-              title: "Email Update Not Allowed",
-              description: "Email verification is required. Please check your Firebase console settings or verify your current email first.",
-              variant: "destructive",
-            });
-            return;
-          } else {
-            throw error;
-          }
-        }
-      }
-      
       // Update Firestore users table
       const updateData = {
         name: adminData.name,
@@ -377,24 +250,10 @@ const Settings = () => {
         });
       }
 
-      // If email was changed, sign out and redirect to login page
-      if (emailChanged) {
-        toast({
-          title: "Settings Saved",
-          description: `Your profile and email have been updated. A verification email has been sent to ${adminData.email}. Please check your inbox and click the verification link to complete the email change. You will be redirected to login.`,
-        });
-        
-        // Sign out and redirect to login page after email change
-        await signOut(auth);
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 2000);
-      } else {
-        toast({
-          title: "Settings Saved",
-          description: "Your profile has been updated successfully",
-        });
-      }
+      toast({
+        title: "Settings Saved",
+        description: "Your profile has been updated successfully",
+      });
     } catch (error: any) {
       console.error("Error saving settings:", error);
       toast({
@@ -408,7 +267,6 @@ const Settings = () => {
   };
 
   const handleSaveAll = async () => {
-    const authUser = auth.currentUser;
     if (!authUser) {
       toast({
         title: "Not Authenticated",
@@ -418,142 +276,76 @@ const Settings = () => {
       return;
     }
 
-    // Check if both email and password are being changed
-    const emailChanged = adminData.email !== authUser.email;
     const passwordChanged = passwords.newPassword && passwords.confirmPassword;
-    const needsReauth = emailChanged || passwordChanged;
-
-    // If email or password is changing, we need current password
-    if (needsReauth && !passwords.currentPassword) {
+    if (passwordChanged && !validatePasswordChange()) return;
+    if (passwordChanged && !passwords.currentPassword) {
       toast({
         title: "Password Required",
-        description: "Please enter your current password to make changes",
+        description: "Please enter your current password to change password",
         variant: "destructive",
       });
       return;
     }
 
-    // If both email and password are changing, handle them together
-    if (emailChanged && passwordChanged) {
-      if (!validatePasswordChange()) return;
+    try {
+      setSaving(true);
+      const userId = authUser.uid;
+      const adminDocRef = doc(db, "users", userId);
+      const adminDocSnap = await getDoc(adminDocRef);
+      const updateData = {
+        name: adminData.name,
+        email: adminData.email,
+        ...(adminData.companyName && { companyName: adminData.companyName }),
+        updatedAt: serverTimestamp()
+      };
 
-      try {
-        setSaving(true);
-        
-        // Re-authenticate once with current email and password
-        const credential = EmailAuthProvider.credential(
-          authUser.email!,
-          passwords.currentPassword
-        );
-        await reauthenticateWithCredential(authUser, credential);
-        
-        // Send verification email for the new email address
-        await verifyBeforeUpdateEmail(authUser, adminData.email);
-        
-        // Update password (this can be done immediately)
-        await updatePassword(authUser, passwords.newPassword);
-        
-        // Update Firestore with new email (pending verification)
-        const userId = authUser.uid;
-        const adminDocRef = doc(db, "users", userId);
-        const adminDocSnap = await getDoc(adminDocRef);
-        
-        const updateData = {
-          name: adminData.name,
-          email: adminData.email,
-          ...(adminData.companyName && { companyName: adminData.companyName }),
-          updatedAt: serverTimestamp()
-        };
-
-        if (adminDocSnap.exists()) {
-          await updateDoc(adminDocRef, updateData);
-        } else {
-          await setDoc(adminDocRef, {
-            ...updateData,
-            role: "admin",
-            createdAt: serverTimestamp()
-          });
-        }
-
-        // Clear password fields
-        setPasswords({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: ""
-        });
-
-        toast({
-          title: "Settings Updated",
-          description: `Password updated successfully. A verification email has been sent to ${adminData.email}. Please check your inbox and click the verification link to complete the email change. You will be redirected to login.`,
-        });
-        
-        // Sign out and redirect to login page after email/password change
-        await signOut(auth);
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 2000);
-      } catch (error: any) {
-        console.error("Error saving settings:", error);
-        handleAuthError(error);
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      // Handle email or password change separately
-      if (emailChanged) {
-        await handleSaveProfile();
-      } else if (passwordChanged) {
-        await handlePasswordUpdate();
+      if (adminDocSnap.exists()) {
+        await updateDoc(adminDocRef, updateData);
       } else {
-        // Only profile data (name, companyName) is changing
-        await handleSaveProfile();
+        await setDoc(adminDocRef, {
+          ...updateData,
+          role: "admin",
+          createdAt: serverTimestamp()
+        });
       }
-    }
-  };
 
-  const handleAuthError = (error: any) => {
-    if (error.code === 'auth/wrong-password') {
+      if (passwordChanged) {
+        const result = await changePasswordApi(passwords.currentPassword, passwords.newPassword);
+        if (!result.success) {
+          toast({
+            title: "Profile saved, password update failed",
+            description: result.error,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Settings Saved",
+            description: "Your profile and password have been updated. Redirecting to login.",
+          });
+          await logout();
+          setTimeout(() => navigate("/", { replace: true }), 1500);
+        }
+      } else {
+        toast({
+          title: "Settings Saved",
+          description: "Your profile has been updated successfully",
+        });
+      }
+
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+    } catch (error: any) {
+      console.error("Error saving settings:", error);
       toast({
-        title: "Incorrect Password",
-        description: "Current password is incorrect. Please try again.",
+        title: "Save Failed",
+        description: error.message || "Failed to save settings. Please try again.",
         variant: "destructive",
       });
-    } else if (error.code === 'auth/email-already-in-use') {
-      toast({
-        title: "Email Already In Use",
-        description: "This email is already registered with another account",
-        variant: "destructive",
-      });
-    } else if (error.code === 'auth/invalid-email') {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-    } else if (error.code === 'auth/weak-password') {
-      toast({
-        title: "Weak Password",
-        description: "Password should be at least 6 characters",
-        variant: "destructive",
-      });
-    } else if (error.code === 'auth/requires-recent-login') {
-      toast({
-        title: "Re-authentication Required",
-        description: "Please login again to make these changes",
-        variant: "destructive",
-      });
-    } else if (error.code === 'auth/operation-not-allowed') {
-      toast({
-        title: "Email Update Not Allowed",
-        description: "Email verification is required. Please check your Firebase console settings or verify your current email first.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update. Please try again.",
-        variant: "destructive",
-      });
+    } finally {
+      setSaving(false);
     }
   };
 
