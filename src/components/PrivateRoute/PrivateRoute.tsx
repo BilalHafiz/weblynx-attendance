@@ -1,27 +1,37 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 interface PrivateRouteProps {
   children: JSX.Element;
   role: string;
 }
 
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const { user, userRole, loading } = useAuth(); 
-  const navigate = useNavigate();
+const PrivateRoute = ({ children, role: requiredRole }: PrivateRouteProps) => {
+  const { user, userRole, loading } = useAuth();
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
 
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  if (userRole === "admin") {
-    navigate("/index", { replace: true });
-  } else if (userRole === "employee") {
-    navigate("/employee-dashboard", { replace: true });
+  // Role missing
+  if (!userRole) {
+    toast.error("Role not found. Contact administrator.");
+    return <Navigate to="/" replace />;
+  }
+
+  // Employee case
+  if (userRole === "employee") {
+    toast.info("Employee dashboard is not set up yet.");
+    return <Navigate to="/" replace />;
+  }
+
+  // Admin check
+  if (requiredRole === "admin" && userRole !== "admin") {
+    toast.error("Access denied.");
+    return <Navigate to="/" replace />;
   }
 
   return children;

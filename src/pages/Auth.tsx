@@ -1,30 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../lib/firebase.ts";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from "@/contexts/AuthContext";
+import { loginWithBackend } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, LogIn, Clock } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setUserFromToken } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Trim email and password to remove whitespace
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
@@ -39,58 +37,57 @@ export default function Auth() {
 
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
-      const user = userCredential.user;
+      const result = await loginWithBackend(trimmedEmail, trimmedPassword);
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        localStorage.setItem("userRole", userData.role);
-        localStorage.setItem("userName", userData.name);
+      if (!result.success) {
+        toast({
+          title: "Login Failed",
+          description: result.error || "Invalid email or password.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-        toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
-        navigate(userData.role === "admin" ? "/index" : "/employee-dashboard");
-      } else {
-        // Check if user exists in employees collection
-        const employeeDoc = await getDoc(doc(db, "employees", user.uid));
-        if (employeeDoc.exists()) {
-          const employeeData = employeeDoc.data();
-          localStorage.setItem("userRole", "employee");
-          localStorage.setItem("userName", employeeData.name || user.email || "");
-          toast({ title: "Login Successful", description: `Welcome back, ${employeeData.name || user.email}!` });
-          navigate("/employee-dashboard");
-        } else {
-          toast({ title: "Error", description: "User data not found in Firestore", variant: "destructive" });
-        }
+      if (!result.token || !result.user) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid response from server. Please try again.",
+          variant: "destructive",
+        });
+        return;
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      let message = "Login failed!";
-      
-      // Handle Firebase Auth error codes
-      if (error.code === "auth/user-not-found") {
-        message = "No user found with this email.";
-      } else if (error.code === "auth/wrong-password") {
-        message = "Incorrect password.";
-      } else if (error.code === "auth/invalid-email") {
-        message = "Invalid email address.";
-      } else if (error.code === "auth/invalid-credential") {
-        // Firebase v9+ uses this error code for wrong email/password
-        message = "Invalid email or password.";
-      } else if (error.code === "auth/user-disabled") {
-        message = "This account has been disabled.";
-      } else if (error.code === "auth/too-many-requests") {
-        message = "Too many failed login attempts. Please try again later.";
-      } else if (error.code === "auth/network-request-failed") {
-        message = "Network error. Please check your internet connection.";
-      } else if (error.message) {
-        message = error.message;
+
+      const role = result.user.role;
+
+      if (role === "admin") {
+        setUserFromToken(result.token);
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${result.user.name}!`,
+        });
+        navigate("/index");
+        return;
       }
-      
-      toast({ 
-        title: "Login Failed", 
-        description: message, 
-        variant: "destructive" 
+
+      if (role === "employee") {
+        toast({
+          title: "Employee dashboard is not set up yet.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Role missing or invalid
+      toast({
+        title: "Role not found. Please contact the administrator.",
+        variant: "destructive",
+      });
+    } catch (err) {
+      console.error("Login error:", err);
+      toast({
+        title: "Login Failed",
+        description: "Network error. Please check your connection and try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -101,9 +98,9 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img 
-            src="/logo.png" 
-            alt="WebLynx Logo" 
+          <img
+            src="/logo.png"
+            alt="WebLynx Logo"
             className="h-16 mx-auto mb-4 object-contain"
           />
           <p className="text-muted-foreground mt-1">Employee Attendance System</p>
@@ -153,7 +150,11 @@ export default function Auth() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full h-11 gradient-primary text-primary-foreground font-medium" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full h-11 gradient-primary text-primary-foreground font-medium"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />

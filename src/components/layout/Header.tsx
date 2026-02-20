@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
-import { Bell, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { auth, db } from "../../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   title: string;
@@ -12,22 +8,8 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle }: HeaderProps) {
-  const [adminName, setAdminName] = useState<string>("");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-
-      if (snap.exists()) {
-        setAdminName(snap.data().name);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { user } = useAuth();
+  const adminName = user?.name ?? "";
 
   return (
     <header className="sticky top-0 z-30 flex h-24 items-center justify-between border-b bg-card/80 backdrop-blur-sm px-4 md:px-6">
