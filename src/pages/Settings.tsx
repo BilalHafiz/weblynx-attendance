@@ -368,7 +368,6 @@ const Settings = () => {
         <Card className="shadow-card animate-slide-up">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
               Profile Settings
             </CardTitle>
             <CardDescription>Update your personal information</CardDescription>
@@ -406,7 +405,6 @@ const Settings = () => {
         <Card className="shadow-card animate-slide-up">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-primary" />
               Security
             </CardTitle>
             <CardDescription>Change your account password securely</CardDescription>
@@ -424,9 +422,8 @@ const Settings = () => {
                 />
                 <Button
                   type="button"
-                  variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                  className="absolute right-2 top-1/2 bg-transparent hover:bg-transparent text-white transform -translate-y-1/2 h-6 w-6"
                   onClick={() => togglePasswordVisibility('current')}
                 >
                   {showPasswords.current ? (
@@ -451,9 +448,8 @@ const Settings = () => {
                   />
                   <Button
                     type="button"
-                    variant="ghost"
                     size="icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 top-1/2 bg-transparent hover:bg-transparent text-white transform -translate-y-1/2 h-6 w-6"
                     onClick={() => togglePasswordVisibility('new')}
                   >
                     {showPasswords.new ? (
@@ -478,9 +474,8 @@ const Settings = () => {
                   />
                   <Button
                     type="button"
-                    variant="ghost"
                     size="icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 top-1/2 bg-transparent hover:bg-transparent text-white transform -translate-y-1/2 h-6 w-6"
                     onClick={() => togglePasswordVisibility('confirm')}
                   >
                     {showPasswords.confirm ? (
@@ -494,7 +489,7 @@ const Settings = () => {
             </div>
 
             <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-              <p className="text-sm text-primary">
+              <p className="text-sm text-white">
                 <span className="font-semibold">Security Note:</span> 
                 {" "}Password changes require re-authentication with your current password.
               </p>
@@ -503,7 +498,8 @@ const Settings = () => {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button 
+          <Button
+            size="lg"
             onClick={() => {
               fetchAdminData();
               setPasswords({
@@ -516,7 +512,6 @@ const Settings = () => {
                 description: "All changes have been reset",
               });
             }}
-            variant="outline"
             disabled={saving}
           >
             Reset

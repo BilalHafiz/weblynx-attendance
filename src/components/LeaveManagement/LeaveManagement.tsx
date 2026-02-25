@@ -18,13 +18,28 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { format, isBefore } from "date-fns";
+import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+const calendarWhiteClassNames = {
+    caption_label: "text-sm font-medium text-white",
+    head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem]",
+    day: "h-9 w-9 p-0 font-normal text-white aria-selected:opacity-100 hover:bg-white/10 hover:text-white",
+    day_selected: "bg-primary text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white",
+    day_today: "bg-accent text-white",
+    day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+    day_disabled: "text-white opacity-50",
+    nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-white",
+};
 
 const LeaveManagement = () => {
     const { toast } = useToast();
 
     const [employees, setEmployees] = useState<any[]>([]);
+    const [startDateOpen, setStartDateOpen] = useState(false);
+    const [endDateOpen, setEndDateOpen] = useState(false);
     const [formData, setFormData] = useState({
         employeeId: "",
         leaveType: "",
@@ -225,24 +240,65 @@ const LeaveManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <Label htmlFor="startDate">Start Date</Label>
-                        <Input
-                            type="date"
-                            id="startDate"
-                            value={formData.startDate}
-                            className="text-white [&::-webkit-calendar-picker-indicator]:invert"
-                            onChange={(e) => handleInputChange("startDate", e.target.value)}
-                        />
+                        <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white"
+                                >
+                                    <CalendarIcon className="h-4 w-4 mr-2" />
+                                    {formData.startDate
+                                        ? format(new Date(formData.startDate), "PPP")
+                                        : "dd/mm/yyyy"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={formData.startDate ? new Date(formData.startDate) : undefined}
+                                    onSelect={(d) => {
+                                        if (d) {
+                                            handleInputChange("startDate", format(d, "yyyy-MM-dd"));
+                                            setStartDateOpen(false);
+                                        }
+                                    }}
+                                    classNames={calendarWhiteClassNames}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
 
                     <div>
                         <Label htmlFor="endDate">End Date</Label>
-                        <Input
-                            type="date"
-                            id="endDate"
-                            value={formData.endDate}
-                            className="text-white [&::-webkit-calendar-picker-indicator]:invert"
-                            onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        />
+                        <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white"
+                                >
+                                    <CalendarIcon className="h-4 w-4 mr-2" />
+                                    {formData.endDate
+                                        ? format(new Date(formData.endDate), "PPP")
+                                        : "dd/mm/yyyy"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={formData.endDate ? new Date(formData.endDate) : undefined}
+                                    disabled={(date) =>
+                                        formData.startDate ? isBefore(date, new Date(formData.startDate)) : false
+                                    }
+                                    onSelect={(d) => {
+                                        if (d) {
+                                            handleInputChange("endDate", format(d, "yyyy-MM-dd"));
+                                            setEndDateOpen(false);
+                                        }
+                                    }}
+                                    classNames={calendarWhiteClassNames}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
 

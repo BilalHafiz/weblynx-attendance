@@ -53,6 +53,17 @@ interface Holiday {
   type: "public" | "company";
 }
 
+const calendarWhiteClassNames = {
+  caption_label: "text-sm font-medium text-white",
+  head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem]",
+  day: "h-9 w-9 p-0 font-normal text-white aria-selected:opacity-100 hover:bg-white/10 hover:text-white",
+  day_selected: "bg-primary text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white",
+  day_today: "bg-accent text-white",
+  day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+  day_disabled: "text-white opacity-50",
+  nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-white",
+};
+
 const Holiday = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -233,54 +244,54 @@ const Holiday = () => {
     <DashboardLayout title="Holiday And Leaves" subtitle="Manage attendance rules, holidays, and system settings">
       <div className="space-y-6">
         <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-          <Card className="border-l-4 border-l-primary">
+          <Card className="border-l-4 border-l-primary bg-black">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground">Working Days</p>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.workingDays}</p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
-                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/60">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-l-4 border-l-accent">
+          <Card className="border-l-4 border-l-primary bg-black">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground">Holidays</p>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.holidays}</p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-accent/10">
-                  <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/60">
+                  <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-l-4 border-l-orange-500">
+          <Card className="border-l-4 border-l-primary bg-black">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground">Weekend Offs</p>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.weekends}</p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-orange-500/10">
-                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/60">
+                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-l-4 border-l-green-500">
+          <Card className="border-l-4 border-l-primary bg-black">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-muted-foreground">Total Days</p>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/60">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -310,13 +321,13 @@ const Holiday = () => {
                     <CardDescription className="text-xs sm:text-sm">Manage company and public holidays</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={goToPreviousMonth} className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Button size="icon" onClick={goToPreviousMonth} className="h-8 w-8 sm:h-10 sm:w-10">
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <span className="font-semibold min-w-[100px] sm:min-w-[140px] text-center text-sm sm:text-base">
                       {format(currentMonth, "MMM yyyy")}
                     </span>
-                    <Button variant="outline" size="icon" onClick={goToNextMonth} className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Button size="icon" onClick={goToNextMonth} className="h-8 w-8 sm:h-10 sm:w-10">
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -345,7 +356,7 @@ const Holiday = () => {
                           className={cn(
                             "p-1 sm:p-2 min-h-[50px] sm:min-h-[80px] rounded-md sm:rounded-lg border transition-all cursor-pointer hover:border-primary/50",
                             isCurrentDay && "ring-2 ring-primary",
-                            holiday && "bg-accent/10 border-accent/30",
+                            holiday && "bg-accent/10 border-white hover:border-wwhite",
                             isWeekend && !holiday && "bg-orange-500/10 border-orange-500/30",
                             !holiday && !isWeekend && "bg-card hover:bg-muted/50"
                           )}
@@ -359,14 +370,14 @@ const Holiday = () => {
                           <div className="flex flex-col h-full">
                             <span className={cn(
                               "text-[10px] sm:text-sm font-medium",
-                              isCurrentDay && "text-primary",
-                              isWeekend && "text-orange-600"
+                              isCurrentDay && !holiday && "text-primary",
+                              (isWeekend || holiday) && "text-white"
                             )}>
                               {format(day, "d")}
                             </span>
                             {holiday && (
                               <div className="mt-0.5 sm:mt-1 hidden sm:block">
-                                <Badge variant="secondary" className="text-[10px] sm:text-xs truncate max-w-full bg-accent/20 text-accent-foreground">
+                                <Badge variant="secondary" className="text-[10px] sm:text-xs truncate max-w-full bg-primary text-white">
                                   {holiday.title}
                                 </Badge>
                               </div>
@@ -375,7 +386,7 @@ const Holiday = () => {
                               <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1 sm:hidden" />
                             )}
                             {isWeekend && !holiday && (
-                              <span className="text-[8px] sm:text-xs text-orange-600 mt-0.5 sm:mt-1 hidden sm:block">
+                              <span className="text-[8px] sm:text-xs text-white mt-0.5 sm:mt-1 hidden sm:block">
                                 {isSaturday(day) ? "Sat Off" : "Sun Off"}
                               </span>
                             )}
@@ -387,7 +398,7 @@ const Holiday = () => {
 
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
                     <div className="flex items-center gap-1 sm:gap-2">
-                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-accent/30" />
+                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded ring-1 ring-white bg-accent/30" />
                       <span className="text-[10px] sm:text-sm text-muted-foreground">Holiday</span>
                     </div>
                     <div className="flex items-center gap-1 sm:gap-2">
@@ -434,7 +445,7 @@ const Holiday = () => {
                           <Label>Start Date</Label>
                           <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                             <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-start">
+                              <Button variant="outline" className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white">
                                 <CalendarIcon className="h-4 w-4 mr-2" />
                                 {format(newHoliday.startDate, "PPP")}
                               </Button>
@@ -454,6 +465,7 @@ const Holiday = () => {
                                   }
                                 }}
                                 className="pointer-events-auto"
+                                classNames={calendarWhiteClassNames}
                               />
                             </PopoverContent>
                           </Popover>
@@ -462,7 +474,7 @@ const Holiday = () => {
                           <Label>End Date</Label>
                           <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                             <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-start">
+                              <Button variant="outline" className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white">
                                 <CalendarIcon className="h-4 w-4 mr-2" />
                                 {format(newHoliday.endDate, "PPP")}
                               </Button>
@@ -479,6 +491,7 @@ const Holiday = () => {
                                   }
                                 }}
                                 className="pointer-events-auto"
+                                classNames={calendarWhiteClassNames}
                               />
                             </PopoverContent>
                           </Popover>
@@ -519,7 +532,7 @@ const Holiday = () => {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddHolidayOpen(false)}>Cancel</Button>
+                        <Button onClick={() => setIsAddHolidayOpen(false)}>Cancel</Button>
                         <Button onClick={handleAddHoliday} className="bg-gradient-to-r from-primary to-accent">Add Holiday</Button>
                       </DialogFooter>
                     </DialogContent>
@@ -557,7 +570,7 @@ const Holiday = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7"
+                                className="h-7 w-7 text-white hover:text-white hover:bg-transparent"
                                 onClick={() => setEditingHoliday(holiday)}
                               >
                                 <Edit className="h-3 w-3" />
@@ -592,7 +605,7 @@ const Holiday = () => {
                       <Label>Start Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start">
+                          <Button variant="outline" className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white">
                             <CalendarIcon className="h-4 w-4 mr-2" />
                             {format(editingHoliday.startDate, "PPP")}
                           </Button>
@@ -608,6 +621,7 @@ const Holiday = () => {
                               }
                             }}
                             className="pointer-events-auto"
+                            classNames={calendarWhiteClassNames}
                           />
                         </PopoverContent>
                       </Popover>
@@ -616,7 +630,7 @@ const Holiday = () => {
                       <Label>End Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start">
+                          <Button variant="outline" className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white">
                             <CalendarIcon className="h-4 w-4 mr-2" />
                             {format(editingHoliday.endDate, "PPP")}
                           </Button>
@@ -628,6 +642,7 @@ const Holiday = () => {
                             disabled={(date) => isBefore(date, editingHoliday.startDate)}
                             onSelect={(d) => d && setEditingHoliday({ ...editingHoliday, endDate: d })}
                             className="pointer-events-auto"
+                            classNames={calendarWhiteClassNames}
                           />
                         </PopoverContent>
                       </Popover>
@@ -664,7 +679,7 @@ const Holiday = () => {
                   </div>
                 )}
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setEditingHoliday(null)}>Cancel</Button>
+                  <Button onClick={() => setEditingHoliday(null)}>Cancel</Button>
                   <Button onClick={handleUpdateHoliday} className="bg-gradient-to-r from-primary to-accent">Save Changes</Button>
                 </DialogFooter>
               </DialogContent>

@@ -71,14 +71,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               to={item.url}
               onClick={onClose}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.url)
-                ? "bg-sidebar-accent text-sidebar-primary"
+                ? "bg-sidebar-accent text-white"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 }`}
             >
               <item.icon className="h-5 w-5" />
               <span>{item.title}</span>
               {isActive(item.url) && (
-                <div className="ml-auto h-2 w-2 rounded-full bg-sidebar-primary" />
+                <div className="ml-auto h-2 w-2 rounded-full bg-white" />
               )}
             </NavLink>
           ))}
@@ -92,7 +92,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             to={item.url}
             onClick={onClose}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.url)
-              ? "bg-sidebar-accent text-sidebar-primary"
+              ? "bg-sidebar-accent text-white"
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               }`}
           >

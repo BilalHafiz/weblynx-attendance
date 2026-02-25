@@ -301,48 +301,48 @@ const EmployeeProfile = () => {
         </Link>
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-1 shadow-card animate-slide-up">
-          <CardContent className="pt-4 p-1">
-            <div className="flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 mb-4">
-                {employee.avatar ? <AvatarImage src={employee.avatar} /> :
-                  <AvatarFallback>{employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}</AvatarFallback>}
-              </Avatar>
-              <h2 className="text-xl font-bold text-foreground">{employee.firstName} {employee.lastName}</h2>
-              <Badge variant="outline" className="mt-2 bg-success/10 text-success border-success/20">
+      {/* Top section: user info (avatar, name, status, contact) aligned left */}
+      <Card className="mb-6 shadow-card animate-slide-up">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0">
+              {employee.avatar ? (
+                <AvatarImage src={employee.avatar} />
+              ) : (
+                <AvatarFallback className="text-lg sm:text-xl">
+                  {employee.firstName?.charAt(0)}
+                  {employee.lastName?.charAt(0)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <div className="flex flex-col gap-2 min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+                {employee.firstName} {employee.lastName}
+              </h2>
+              <Badge variant="outline" className="w-fit bg-success/10 text-success border-success/20">
                 {employee.status || "Active"}
               </Badge>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mt-2">
+                {employee.email && (
+                  <div className="flex items-center gap-2 text-sm min-w-0">
+                    <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="text-foreground truncate">{employee.email}</span>
+                  </div>
+                )}
+                {employee.phone && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="text-foreground">{employee.phone}</span>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="mt-6 space-y-4 flex flex-col items-center justify-center">
-              {employee.email && (
-                <div className="flex items-center gap-3 text-sm w-full max-w-[500px]">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                    <Mail className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Email</p>
-                    <p className="font-medium text-foreground">{employee.email}</p>
-                  </div>
-                </div>
-              )}
-              {employee.phone && (
-                <div className="flex items-center gap-3 text-sm w-full max-w-[500px]">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                    <Phone className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Phone</p>
-                    <p className="font-medium text-foreground">{employee.phone}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="lg:col-span-3 space-y-6">
+      {/* Other information: summary cards and monthly record */}
+      <div className="space-y-6">
           {monthSummary && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
@@ -634,7 +634,6 @@ const EmployeeProfile = () => {
               )}
             </CardContent>
           </Card>
-        </div>
       </div>
     </DashboardLayout>
   );
