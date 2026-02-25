@@ -103,7 +103,6 @@ const AddEmployee = () => {
       <Card className="max-w-3xl mx-auto animate-slide-up shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="h-4 w-4 text-primary" />
             Employee Information
           </CardTitle>
           <CardDescription>Enter personal details</CardDescription>

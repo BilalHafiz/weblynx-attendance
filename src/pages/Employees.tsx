@@ -341,7 +341,7 @@ const Employees = () => {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
+              <Button onClick={handleRefresh} disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -364,12 +364,12 @@ const Employees = () => {
 
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             <p className="mt-2 text-muted-foreground">Analyzing Employee Data...</p>
           </div>
         ) : filteredEmployees.length === 0 ? (
           <div className="p-8 text-center">
-            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-primary mx-auto mb-4" />
             <p className="text-gray-600">No employee records found</p>
             <p className="text-sm text-gray-500 mt-1">Try changing your search or filters</p>
           </div>
@@ -434,7 +434,7 @@ const Employees = () => {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="text-white hover:bg-transparent hover:text-white">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -491,7 +491,6 @@ const Employees = () => {
                 </span>
                 <div className="flex gap-1">
                   <Button
-                    variant="outline"
                     size="icon"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => p - 1)}
@@ -499,7 +498,6 @@ const Employees = () => {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant="outline"
                     size="icon"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((p) => p + 1)}

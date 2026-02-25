@@ -569,7 +569,6 @@ export default function Reports() {
               <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
                     Generate Report
                   </CardTitle>
                   <CardDescription>Configure and generate attendance reports</CardDescription>
@@ -646,10 +645,9 @@ export default function Reports() {
               <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
                     Report Preview
                     {reportGenerated && (
-                      <Badge variant="outline" className="ml-2">
+                      <Badge className="ml-2">
                         {months[Number(selectedMonth)]} {selectedYear}
                       </Badge>
                     )}
@@ -659,19 +657,19 @@ export default function Reports() {
                   {reportGenerated ? (
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <div className="bg-black rounded-lg p-4 text-center">
                           <div className="text-2xl font-bold text-primary">{reportData.totalWorkingDays}</div>
                           <div className="text-xs text-muted-foreground">Working Days</div>
                         </div>
-                        <div className="bg-green-100 rounded-lg p-4 text-center">
+                        <div className="bg-black rounded-lg p-4 text-center">
                           <div className="text-2xl font-bold text-green-600">{reportData.presentDays}</div>
                           <div className="text-xs text-muted-foreground">Present Days</div>
                         </div>
-                        <div className="bg-red-100 rounded-lg p-4 text-center">
+                        <div className="bg-black rounded-lg p-4 text-center">
                           <div className="text-2xl font-bold text-red-600">{reportData.absentDays}</div>
                           <div className="text-xs text-muted-foreground">Absent Days</div>
                         </div>
-                        <div className="bg-yellow-100 rounded-lg p-4 text-center">
+                        <div className="bg-black rounded-lg p-4 text-center">
                           <div className="text-2xl font-bold text-yellow-600">{reportData.lateDays}</div>
                           <div className="text-xs text-muted-foreground">HalfDay Days</div>
                         </div>
@@ -679,8 +677,8 @@ export default function Reports() {
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="border rounded-lg p-4 flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                          <div className="h-10 w-10 rounded-lg bg-primary/60 flex items-center justify-center">
+                            <CheckCircle2 className="h-5 w-5 text-white" />
                           </div>
                           <div>
                             <div className="text-lg font-semibold">{reportData.approvedLeaves}</div>
@@ -688,8 +686,8 @@ export default function Reports() {
                           </div>
                         </div>
                         <div className="border rounded-lg p-4 flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                            <Palmtree className="h-5 w-5 text-purple-600" />
+                          <div className="h-10 w-10 rounded-lg bg-primary/60 flex items-center justify-center">
+                            <Palmtree className="h-5 w-5 text-white" />
                           </div>
                           <div>
                             <div className="text-lg font-semibold">{reportData.holidays}</div>
@@ -697,8 +695,8 @@ export default function Reports() {
                           </div>
                         </div>
                         <div className="border rounded-lg p-4 flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <CalendarDays className="h-5 w-5 text-blue-600" />
+                          <div className="h-10 w-10 rounded-lg bg-primary/60 flex items-center justify-center">
+                            <CalendarDays className="h-5 w-5 text-white" />
                           </div>
                           <div>
                             <div className="text-lg font-semibold">{reportData.weekendDays}</div>
@@ -736,15 +734,15 @@ export default function Reports() {
                       <div className="pt-4 border-t">
                         <Label className="text-sm font-medium mb-3 block">Download Report</Label>
                         <div className="flex flex-wrap gap-3">
-                          <Button variant="outline" onClick={() => handleDownload("pdf")} className="flex-1 min-w-[120px]">
+                          <Button onClick={() => handleDownload("pdf")} className="flex-1 min-w-[120px]">
                             <File className="h-4 w-4 mr-2" />
                             PDF
                           </Button>
-                          <Button variant="outline" onClick={() => handleDownload("excel")} className="flex-1 min-w-[120px]">
+                          <Button onClick={() => handleDownload("excel")} className="flex-1 min-w-[120px]">
                             <FileSpreadsheet className="h-4 w-4 mr-2" />
                             Excel
                           </Button>
-                          <Button variant="outline" onClick={() => handleDownload("csv")} className="flex-1 min-w-[120px]">
+                          <Button onClick={() => handleDownload("csv")} className="flex-1 min-w-[120px]">
                             <FileText className="h-4 w-4 mr-2" />
                             CSV
                           </Button>

@@ -7,7 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, Fingerprint, Clock, AlertCircle } from "lucide-react";
+import { Search, Filter, Fingerprint, Clock, AlertCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { collection, doc, getDocs, setDoc, getDoc } from "firebase/firestore";
@@ -56,6 +58,17 @@ const statusStyles: Record<string, string> = {
   "Checked-in": "bg-orange-100 text-orange-800 border-orange-200",
 };
 
+const calendarWhiteClassNames = {
+  caption_label: "text-sm font-medium text-white",
+  head_cell: "text-white rounded-md w-9 font-normal text-[0.8rem]",
+  day: "h-9 w-9 p-0 font-normal text-white aria-selected:opacity-100 hover:bg-white/10 hover:text-white",
+  day_selected: "bg-primary text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white",
+  day_today: "bg-accent text-white",
+  day_outside: "day-outside text-white opacity-50 aria-selected:bg-accent/50 aria-selected:text-white aria-selected:opacity-30",
+  day_disabled: "text-white opacity-50",
+  nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-white",
+};
+
 const Attendance = () => {
   const today = format(new Date(), "yyyy-MM-dd");
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -66,6 +79,7 @@ const Attendance = () => {
   const [selectedEmp, setSelectedEmp] = useState("");
   const [attendanceType, setAttendanceType] = useState<"in" | "out">("in");
   const [date, setDate] = useState(today);
+  const [dateOpen, setDateOpen] = useState(false);
   const [time, setTime] = useState(format(new Date(), "HH:mm"));
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [leaveRecords, setLeaveRecords] = useState<LeaveRecord[]>([]);
@@ -433,31 +447,31 @@ const Attendance = () => {
       <div className="bg-card rounded-xl shadow-card">
         <div className="p-4 border-b bg-muted/50">
           <div className="grid grid-cols-5 gap-2">
-            <div className="text-center p-2 bg-green-50 rounded">
+            <div className="text-center p-2 bg-black rounded">
               <div className="text-lg font-bold text-green-600">
                 {attendance.filter(a => a.status === "Present").length}
               </div>
               <div className="text-xs text-muted-foreground">Present</div>
             </div>
-            <div className="text-center p-2 bg-yellow-50 rounded">
+            <div className="text-center p-2 bg-black rounded">
               <div className="text-lg font-bold text-yellow-600">
                 {attendance.filter(a => a.status === "HalfDay").length}
               </div>
               <div className="text-xs text-gray-600">HalfDay</div>
             </div>
-            <div className="text-center p-2 bg-red-50 rounded">
+            <div className="text-center p-2 bg-black rounded">
               <div className="text-lg font-bold text-red-600">
                 {attendance.filter(a => a.status === "Absent").length}
               </div>
               <div className="text-xs text-gray-600">Absent</div>
             </div>
-            <div className="text-center p-2 bg-blue-50 rounded">
+            <div className="text-center p-2 bg-black rounded">
               <div className="text-lg font-bold text-blue-600">
                 {attendance.filter(a => a.status === "Leave").length}
               </div>
               <div className="text-xs text-gray-600">Leave</div>
             </div>
-            <div className="text-center p-2 bg-purple-50 rounded">
+            <div className="text-center p-2 bg-black rounded">
               <div className="text-lg font-bold text-purple-600">
                 {attendance.filter(a => a.status === "Holiday").length}
               </div>
@@ -480,7 +494,7 @@ const Attendance = () => {
           <div className="flex gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button className="gap-2">
                   <Fingerprint className="h-4 w-4" />
                   Mark Attendance
                 </Button>
@@ -496,7 +510,7 @@ const Attendance = () => {
                     value={selectedEmp}
                     onValueChange={setSelectedEmp}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-white">
                       <SelectValue placeholder="Select Employee" />
                     </SelectTrigger>
                     <SelectContent>
@@ -514,7 +528,7 @@ const Attendance = () => {
                       setAttendanceType(v as "in" | "out")
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-white">
                       <SelectValue placeholder="Select Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -526,11 +540,30 @@ const Attendance = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Date</label>
-                      <Input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                      />
+                      <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white"
+                          >
+                            <CalendarIcon className="h-4 w-4 mr-2" />
+                            {date ? format(new Date(date), "dd/MM/yyyy") : "dd/mm/yyyy"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={date ? new Date(date) : undefined}
+                            onSelect={(d) => {
+                              if (d) {
+                                setDate(format(d, "yyyy-MM-dd"));
+                                setDateOpen(false);
+                              }
+                            }}
+                            classNames={calendarWhiteClassNames}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Time</label>
@@ -538,6 +571,7 @@ const Attendance = () => {
                         type="time"
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
+                        className="w-full justify-start border-white text-white hover:bg-white/10 hover:text-white h-10 [&::-webkit-calendar-picker-indicator]:invert"
                       />
                     </div>
                   </div>

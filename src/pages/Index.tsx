@@ -324,8 +324,8 @@ const Index = () => {
           change={`${dashboardData.attendanceRate}% attendance rate`}
           changeType={dashboardData.attendanceRate >= 90 ? "positive" : dashboardData.attendanceRate >= 80 ? "neutral" : "negative"}
           icon={Users}
-          iconColor="text-primary"
-          iconBg="bg-primary/20"
+          iconColor="text-white"
+          iconBg="bg-primary/60"
           isLoading={isLoading}
         />
         <CustomStatCard
@@ -334,8 +334,8 @@ const Index = () => {
           change={`${dashboardData.lateToday} HalfDay, ${dashboardData.checkedInToday} checked-in`}
           changeType="positive"
           icon={UserCheck}
-          iconColor="text-green-600"
-          iconBg="bg-green-100"
+          iconColor="text-white"
+          iconBg="bg-primary/60"
           isLoading={isLoading}
         />
         <CustomStatCard
@@ -344,8 +344,8 @@ const Index = () => {
           change={`${dashboardData.onLeaveToday} on leave`}
           changeType="negative"
           icon={UserX}
-          iconColor="text-red-600"
-          iconBg="bg-red-100"
+          iconColor="text-white"
+          iconBg="bg-primary/60"
           isLoading={isLoading}
         />
         <CustomStatCard
@@ -354,8 +354,8 @@ const Index = () => {
           change="Average per employee"
           changeType={dashboardData.avgWorkHours >= 8 ? "positive" : "neutral"}
           icon={Clock}
-          iconColor="text-purple-600"
-          iconBg="bg-purple-100"
+          iconColor="text-white"
+          iconBg="bg-primary/60"
           isLoading={isLoading}
         />
       </div>
@@ -445,8 +445,8 @@ const Index = () => {
 
         <div className="bg-card rounded-xl shadow p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <BarChart3 className="h-6 w-6 text-primary" />
+            <div className="p-2 rounded-lg bg-primary/60">
+              <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">Attendance Status</h3>
@@ -541,8 +541,8 @@ const Index = () => {
       <div className="bg-card rounded-xl shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="p-2 rounded-lg bg-primary/60">
+              <CheckCircle className="h-6 w-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
@@ -551,7 +551,7 @@ const Index = () => {
           </div>
           <button
             onClick={handleRefresh}
-            className="text-sm text-primary hover:text-secondary flex items-center gap-1 transition-colors"
+            className="text-sm text-white bg-primary/50 p-2 rounded-sm flex items-center gap-1 transition-colors"
           >
             <RefreshCw className="h-3 w-3" /> Refresh
           </button>
@@ -585,12 +585,12 @@ const Index = () => {
             {dashboardData.recentActivities.map((activity, index) => (
               <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${activity.type === 'checkin' ? 'bg-green-100' : 'bg-primary/20'
+                  <div className={`p-2 rounded-lg ${activity.type === 'checkin' ? 'bg-primary/60' : 'bg-primary/60'
                     }`}>
                     {activity.type === 'checkin' ? (
-                      <Clock className="h-4 w-4 text-green-600" />
+                      <Clock className="h-4 w-4 text-white" />
                     ) : (
-                      <Calendar className="h-4 w-4 text-primary" />
+                      <Calendar className="h-4 w-4 text-white" />
                     )}
                   </div>
                   <div>
@@ -599,12 +599,12 @@ const Index = () => {
                         {activity.employeeName}
                       </p>
                       {activity.type === 'checkin' && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-800">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-white">
                           Checked {activity.status === 'Checked-in' ? 'In' : activity.status}
                         </span>
                       )}
                       {activity.type === 'leave' && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-white">
                           {activity.leaveType} Leave
                         </span>
                       )}
